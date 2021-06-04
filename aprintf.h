@@ -7,11 +7,9 @@
 
 #pragma once
 
-int aprintf(char *str, ...) {
+int avprintf(char *str, va_list argv) {
   int i, j, count = 0;
 
-  va_list argv;
-  va_start(argv, str);
   for (i = 0, j = 0; str[i] != '\0'; i++) {
     if (str[i] == '%') {
       count++;
@@ -43,11 +41,20 @@ int aprintf(char *str, ...) {
       j = i + 1;
     }
   };
-  va_end(argv);
 
   if (i > j) {
     Serial.write(reinterpret_cast<const uint8_t *>(str + j), i - j);
   }
+
+  return count;
+}
+
+int aprintf(char *str, ...) {
+  va_list argv;
+
+  va_start(argv, str);
+  const int count = avprintf(str, argv);
+  va_end(argv);
 
   return count;
 }
