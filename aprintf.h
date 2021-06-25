@@ -14,4 +14,6 @@
 #include <Arduino.h>
 
 int avprintf(char *str, va_list argv);
+int avprintf(const __FlashStringHelper *str, va_list argv);
 int aprintf(char *str, ...);
+int aprintf(const __FlashStringHelper *str, ...);

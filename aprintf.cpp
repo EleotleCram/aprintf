@@ -1,5 +1,19 @@
 #include <aprintf.h>
 
+#include <avr/pgmspace.h>
+
+static size_t fstrlen(const __FlashStringHelper *ifsh) {
+  PGM_P p = reinterpret_cast<PGM_P>(ifsh);
+  size_t n = 0;
+  while (1) {
+    unsigned char c = pgm_read_byte(p++);
+    if (c == 0)
+      break;
+    n++;
+  }
+  return n;
+}
+
 int avprintf(char *str, va_list argv) {
   int i, j, count = 0;
 
@@ -42,7 +56,23 @@ int avprintf(char *str, va_list argv) {
   return count;
 }
 
+int avprintf(const __FlashStringHelper *ifsh, va_list argv) {
+  char buf[fstrlen(ifsh) + 1] = {0};
+  strcpy_P(buf, reinterpret_cast<PGM_P>(ifsh));
+  avprintf(buf, argv);
+}
+
 int aprintf(char *str, ...) {
+  va_list argv;
+
+  va_start(argv, str);
+  const int count = avprintf(str, argv);
+  va_end(argv);
+
+  return count;
+}
+
+int aprintf(const __FlashStringHelper *str, ...) {
   va_list argv;
 
   va_start(argv, str);
